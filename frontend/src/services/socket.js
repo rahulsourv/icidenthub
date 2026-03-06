@@ -6,7 +6,7 @@ export const connectSocket = () => {
   if (!socket) {
     const token = localStorage.getItem("token");
 
-    socket = io("http://localhost:5000", {
+    socket = io("https://icidenthub.onrender.com", {
       auth: { token },
     });
   }
