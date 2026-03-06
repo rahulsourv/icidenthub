@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Secure Org Chat</title>
+</head>
+<body>
+
+  <h2>Secure Organization Chat</h2>
+
+  <input id="token" placeholder="Paste JWT Token here" style="width:400px"/>
+  <button onclick="connectSocket()">Connect</button>
+
+  <br><br>
+
+  <input id="message" placeholder="Type message"/>
+  <button onclick="sendMessage()">Send</button>
+
+  <ul id="messages"></ul>
+
+  <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+
+  <script>
+    let socket;
+
+    function connectSocket() {
+      const token = document.getElementById("token").value;
+
+      socket = io("http://localhost:5000", {
+  auth: { token: token },
+  reconnection: true,
+  reconnectionAttempts: Infinity,
+  reconnectionDelay: 1000
+});
+
+      socket.on("connect", () => {
+        alert("Connected!");
+      });
+
+      socket.on("receive_message", (data) => {
+        const li = document.createElement("li");
+        li.textContent = data.sender + ": " + data.message;
+        document.getElementById("messages").appendChild(li);
+      });
+
+      socket.on("notification", (data) => {
+        alert("🔔 " + data.message);
+      });
+
+      socket.on("connect_error", (err) => {
+        alert("Connection failed: " + err.message);
+      });
+      socket.on("unread_count_update", (data) => {
+  console.log("Unread count:", data.unreadCount);
+});
+    }
+
+    function sendMessage() {
+      const message = document.getElementById("message").value;
+      socket.emit("send_message", message);
+    }
+  </script>
+
+</body>
+</html>
